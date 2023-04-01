@@ -1,30 +1,31 @@
+import os
 import telegram
 import openai
-import os
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Set up the Telegram bot and OpenAI API
 bot = telegram.Bot(token=os.environ['TELEGRAM_BOT_TOKEN'])
 openai.api_key = os.environ['OPENAI_API_KEY']
+model_engine = 'text-davinci-002'
 
 # Define a function to handle incoming messages
 def handle_message(update, context):
     # Get the user input from the Telegram message
     user_input = update.message.text
     
-    # Generate a response using the Chat API
+    # Send the user input to ChatGPT and get a response
     response = openai.Completion.create(
-        engine='davinci',
-        prompt=("{user_input}"),
+        engine=model_engine,
+        prompt=user_input,
         max_tokens=60,
         temperature=0.5,
         n=1,
         stop=None,
-        frequency_penalty=0,
-        presence_penalty=0
+        presence_penalty=0.6,
+        frequency_penalty=0.6,
+        model=None,
+        logprobs=None,
     )
-    
-    # Extract the response from the API output
     bot_response = response.choices[0].text.strip()
     
     # Send the response back to the user in Telegram
