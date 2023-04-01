@@ -1,46 +1,33 @@
-import telegram
 import os
-import telegram.ext
+import telegram
 import openai
-from dotenv import load_dotenv
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-load_dotenv()
+# Set up the Telegram bot and OpenAI API
+bot = telegram.Bot(token=os.environ['TELEGRAM_BOT_TOKEN'])
+openai.api_key = os.environ['OPENAI_API_KEY']
 
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-openai.api_key = os.getenv('OPENAI_API_KEY')
-
-def generate_text(prompt):
+# Define a function to handle incoming messages
+def handle_message(update, context):
+    # Get the user input from the Telegram message
+    user_input = update.message.text
+    
+    # Send the user input to ChatGPT and get a response
     response = openai.Completion.create(
-      engine="davinci",
-      prompt=prompt,
-      max_tokens=1024,
-      n=1,
-      stop=None,
-      temperature=0.7,
+        engine='davinci',
+        prompt=user_input,
+        max_tokens=60,
+        temperature=0.5,
     )
-    return response.choices[0].text.strip()
+    bot_response = response.choices[0].text.strip()
+    
+    # Send the response back to the user in Telegram
+    bot.send_message(chat_id=update.message.chat_id, text=bot_response)
 
-def start(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text="Hi, I'm a ChatGPT bot! What can I help you with?")
+# Set up the Telegram bot's message handler
+updater = Updater(use_context=True)
+dispatcher = updater.dispatcher
+dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), handle_message))
 
-def reply_to_message(update, context):
-    user_message = update.message.text
-    prompt = f"User: {user_message}\nBot:"
-    bot_response = generate_text(prompt)
-    context.bot.send_message(chat_id=update.message.chat_id, text=bot_response)
-
-def main():
-    updater = telegram.ext.Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-
-    start_handler = telegram.ext.CommandHandler('start', start)
-    dispatcher.add_handler(start_handler)
-
-    reply_handler = telegram.ext.MessageHandler(telegram.ext.Filters.text, reply_to_message)
-    dispatcher.add_handler(reply_handler)
-
-    updater.start_polling()
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
+# Start the Telegram bot
+updater.start_polling()
