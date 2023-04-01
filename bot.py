@@ -12,13 +12,19 @@ def handle_message(update, context):
     # Get the user input from the Telegram message
     user_input = update.message.text
     
-    # Send the user input to ChatGPT and get a response
-    response = openai.chat.create(
+    # Generate a response using the Chat API
+    response = openai.Completion.create(
         engine='davinci',
-        prompt=user_input,
+        prompt=(f"User: {user_input}\nAI:"),
         max_tokens=60,
         temperature=0.5,
+        n=1,
+        stop=None,
+        frequency_penalty=0,
+        presence_penalty=0
     )
+    
+    # Extract the response from the API output
     bot_response = response.choices[0].text.strip()
     
     # Send the response back to the user in Telegram
