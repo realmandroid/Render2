@@ -13,7 +13,7 @@ def handle_message(update, context):
     user_input = update.message.text
     
     # Send the user input to ChatGPT and get a response
-    response = openai.Completion.create(
+    response = openai.chat.create(
         engine='davinci',
         prompt=user_input,
         max_tokens=60,
