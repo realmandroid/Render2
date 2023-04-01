@@ -1,5 +1,6 @@
 import telegram
 import os
+import telegram.ext
 import openai
 from dotenv import load_dotenv
 
