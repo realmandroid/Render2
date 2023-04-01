@@ -15,7 +15,7 @@ def handle_message(update, context):
     # Generate a response using the Chat API
     response = openai.Completion.create(
         engine='davinci',
-        prompt=(f"User: {user_input}\nAI:"),
+        prompt=("{user_input}"),
         max_tokens=60,
         temperature=0.5,
         n=1,
