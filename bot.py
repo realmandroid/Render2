@@ -1,6 +1,6 @@
-import os
 import telegram
 import openai
+import os
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Set up the Telegram bot and OpenAI API
@@ -25,7 +25,7 @@ def handle_message(update, context):
     bot.send_message(chat_id=update.message.chat_id, text=bot_response)
 
 # Set up the Telegram bot's message handler
-updater = Updater(use_context=True)
+updater = Updater(token=os.environ['TELEGRAM_BOT_TOKEN'], use_context=True)
 dispatcher = updater.dispatcher
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), handle_message))
 
