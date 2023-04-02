@@ -1,29 +1,61 @@
-import os
+import openai
 import telegram
-from telegram.ext import Updater, MessageHandler, Filters
-from fpdf import FPDF
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 
-# Load bot token from environment variable
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
+# Set up OpenAI API credentials
+openai.api_key = "YOUR_API_KEY"
 
-# Create bot instance
-bot = telegram.Bot(token=BOT_TOKEN)
+# Define conversation states
+START, TYPING_REPLY = range(2)
 
-def generate_pdf(text):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=text, ln=1)
-    pdf.output("output.pdf")
+# Define conversation flow
+def start(update, context):
+    context.user_data["conversation_state"] = START
+    update.message.reply_text("Hi! I'm ChatGPT. What's your name?")
+    return TYPING_REPLY
 
-def handle_message(update, context):
-    message_text = update.message.text
-    generate_pdf(message_text)
-    context.bot.send_document(chat_id=update.effective_chat.id, document=open('output.pdf', 'rb'))
+def reply(update, context):
+    # Generate response using OpenAI API
+    prompt = f"Conversation with {update.message.from_user.first_name}:\n{update.message.text}"
+    response = openai.Completion.create(
+        engine="davinci",
+        prompt=prompt,
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.7,
+    ).choices[0].text.strip()
+
+    # Send response to user
+    update.message.reply_text(response)
+
+    # Wait for next message
+    return TYPING_REPLY
+
+def cancel(update, context):
+    update.message.reply_text("Bye! Have a good day.")
+    return ConversationHandler.END
+
+def main():
+    # Set up Telegram bot
+    updater = Updater(token="YOUR_BOT_TOKEN", use_context=True)
+    dispatcher = updater.dispatcher
+
+    # Define conversation handler
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            TYPING_REPLY: [MessageHandler(Filters.text & ~Filters.command, reply)]
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+
+    # Add conversation handler to dispatcher
+    dispatcher.add_handler(conv_handler)
+
+    # Start bot
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == '__main__':
-    updater = Updater(token=BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-    handler = MessageHandler(Filters.text, handle_message)
-    dispatcher.add_handler(handler)
-    updater.start_polling()
+    main()
