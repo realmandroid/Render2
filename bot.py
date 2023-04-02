@@ -1,40 +1,25 @@
-import os
 import telegram
-import openai
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, MessageHandler, Filters
+from fpdf import FPDF
 
-# Set up the Telegram bot and OpenAI API
-bot = telegram.Bot(token=os.environ['TELEGRAM_BOT_TOKEN'])
-openai.api_key = os.environ['OPENAI_API_KEY']
-model_engine = 'text-davinci-003'
+# Replace YOUR_TOKEN with your actual bot token
+bot = telegram.Bot(token='YOUR_TOKEN')
 
-# Define a function to handle incoming messages
+def generate_pdf(text):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=text, ln=1)
+    pdf.output("output.pdf")
+
 def handle_message(update, context):
-    # Get the user input from the Telegram message
-    user_input = update.message.text
-    
-    # Send the user input to ChatGPT and get a response
-    response = openai.Completion.create(
-        engine=model_engine,
-        prompt=user_input,
-        max_tokens=1960,
-        temperature=0.5,
-        n=1,
-        stop=None,
-        presence_penalty=0.6,
-        frequency_penalty=0.6,
-        model=None,
-        logprobs=None,
-    )
-    bot_response = response.choices[0].text.strip()
-    
-    # Send the response back to the user in Telegram
-    bot.send_message(chat_id=update.message.chat_id, text=bot_response)
+    message_text = update.message.text
+    generate_pdf(message_text)
+    context.bot.send_document(chat_id=update.effective_chat.id, document=open('output.pdf', 'rb'))
 
-# Set up the Telegram bot's message handler
-updater = Updater(token=os.environ['TELEGRAM_BOT_TOKEN'], use_context=True)
-dispatcher = updater.dispatcher
-dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), handle_message))
-
-# Start the Telegram bot
-updater.start_polling()
+if __name__ == '__main__':
+    updater = Updater(token='YOUR_TOKEN', use_context=True)
+    dispatcher = updater.dispatcher
+    handler = MessageHandler(Filters.text, handle_message)
+    dispatcher.add_handler(handler)
+    updater.start_polling()
