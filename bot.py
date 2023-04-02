@@ -1,9 +1,14 @@
+import os
 import openai
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 
+# Get API key and bot token from environment variables
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+
 # Set up OpenAI API credentials
-openai.api_key = "YOUR_API_KEY"
+openai.api_key = OPENAI_API_KEY
 
 # Define conversation states
 START, TYPING_REPLY = range(2)
@@ -38,7 +43,7 @@ def cancel(update, context):
 
 def main():
     # Set up Telegram bot
-    updater = Updater(token="YOUR_BOT_TOKEN", use_context=True)
+    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
     # Define conversation handler
