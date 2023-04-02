@@ -20,16 +20,22 @@ def start(update, context):
     return TYPING_REPLY
 
 def reply(update, context):
-    # Generate response using OpenAI API
+    # Send user's message to OpenAI API
     prompt = f"Conversation with {update.message.from_user.first_name}:\n{update.message.text}"
-    response = openai.Completion.create(
-        engine="davinci",
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.7,
-    ).choices[0].text.strip()
+    response = "I'm sorry, I don't understand. Can you please rephrase your question?"
+
+    # Generate response using OpenAI API
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-002",
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        ).choices[0].text.strip()
+    except:
+        pass
 
     # Send response to user
     update.message.reply_text(response)
@@ -43,12 +49,8 @@ def cancel(update, context):
 
 def main():
     # Set up Telegram bot
-    try:
-        updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
-        dispatcher = updater.dispatcher
-    except telegram.error.Unauthorized as e:
-        print("Error: Unauthorized. Please check if your bot token is correct and authorized to access the Telegram API.")
-        return
+    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
 
     # Define conversation handler
     conv_handler = ConversationHandler(
