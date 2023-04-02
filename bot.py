@@ -6,7 +6,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 # Set up the Telegram bot and OpenAI API
 bot = telegram.Bot(token=os.environ['TELEGRAM_BOT_TOKEN'])
 openai.api_key = os.environ['OPENAI_API_KEY']
-model_engine = 'text-davinci-002'
+model_engine = 'text-davinci-003'
 
 # Define a function to handle incoming messages
 def handle_message(update, context):
@@ -17,7 +17,7 @@ def handle_message(update, context):
     response = openai.Completion.create(
         engine=model_engine,
         prompt=user_input,
-        max_tokens=1848,
+        max_tokens=1960,
         temperature=0.5,
         n=1,
         stop=None,
