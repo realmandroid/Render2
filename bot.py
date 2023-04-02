@@ -17,7 +17,7 @@ def handle_message(update, context):
     response = openai.Completion.create(
         engine=model_engine,
         prompt=user_input,
-        max_tokens=2048,
+        max_tokens=1848,
         temperature=0.5,
         n=1,
         stop=None,
