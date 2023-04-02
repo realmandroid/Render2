@@ -43,8 +43,12 @@ def cancel(update, context):
 
 def main():
     # Set up Telegram bot
-    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
+    try:
+        updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
+        dispatcher = updater.dispatcher
+    except telegram.error.Unauthorized as e:
+        print("Error: Unauthorized. Please check if your bot token is correct and authorized to access the Telegram API.")
+        return
 
     # Define conversation handler
     conv_handler = ConversationHandler(
