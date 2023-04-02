@@ -1,9 +1,13 @@
+import os
 import telegram
 from telegram.ext import Updater, MessageHandler, Filters
 from fpdf import FPDF
 
-# Replace YOUR_TOKEN with your actual bot token
-bot = telegram.Bot(token='YOUR_TOKEN')
+# Load bot token from environment variable
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+
+# Create bot instance
+bot = telegram.Bot(token=BOT_TOKEN)
 
 def generate_pdf(text):
     pdf = FPDF()
@@ -18,7 +22,7 @@ def handle_message(update, context):
     context.bot.send_document(chat_id=update.effective_chat.id, document=open('output.pdf', 'rb'))
 
 if __name__ == '__main__':
-    updater = Updater(token='YOUR_TOKEN', use_context=True)
+    updater = Updater(token=BOT_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
     handler = MessageHandler(Filters.text, handle_message)
     dispatcher.add_handler(handler)
